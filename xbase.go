@@ -151,8 +151,7 @@ func (db *XBase) CloseFile() {
 	if db.isMod {
 		db.header.setModDate(time.Now())
 		db.writeHeader()
-		db.fileSeek(0, 2)
-		db.fileWrite([]byte{fileEnd})
+		db.writeFileEnd()
 	}
 	db.fileClose()
 }
@@ -472,6 +471,19 @@ func (db *XBase) IsPanic() bool {
 }
 
 // Private
+
+func (db *XBase) writeFileEnd() {
+	size := int64(db.header.DataOffset) + db.RecCount()*int64(db.header.RecSize) + 1
+	// check file size
+	fi, err := db.file.Stat()
+	if err != nil {
+		panic(err)
+	}
+	if fi.Size()+1 == size {
+		db.fileSeek(0, 2) // end file position
+		db.fileWrite([]byte{fileEnd})
+	}
+}
 
 func (db *XBase) goTo(recNo int64) {
 	if recNo < 1 {

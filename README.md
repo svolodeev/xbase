@@ -13,7 +13,7 @@ Deleting a record does not physically destroy it on disk. In record, the deletio
 If an error occurs when calling the method, use the __Error()__ method to get its value. By default, methods don't panic. This behavior can be changed. If you call __SetPanic(true)__, then when an error occurs, the methods will cause a panic. Use whichever is more convenient for you.
 
 ### Limitations
-Index files are not supported. The following field types are supported: __C__, __N__, __L__, __D__. Memo fields are not supported. XBase objects only support exclusive file access.
+The following field types are supported: __C__, __N__, __L__, __D__. Memo fields are not supported. Index files are not supported.
 
 ## Examples
 File creation.

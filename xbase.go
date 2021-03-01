@@ -628,7 +628,7 @@ func (db *XBase) fileOpen(name string, readOnly bool) {
 	if readOnly {
 		f, err = os.Open(name)
 	} else {
-		f, err = os.OpenFile(name, os.O_RDWR, 0644)
+		f, err = os.OpenFile(name, os.O_RDWR, 0666)
 	}
 	if err != nil {
 		panic(err)

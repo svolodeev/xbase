@@ -219,3 +219,83 @@ func TestReadPrev(t *testing.T) {
 	db.CloseFile()
 	require.NoError(t, db.Error())
 }
+
+func copyFile(src, dst string) {
+	input, err := ioutil.ReadFile(src)
+	if err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile(dst, input, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestOpenEditRec(t *testing.T) {
+	copyFile("./testdata/rec3.dbf", "./testdata/test1.dbf")
+
+	db := New()
+	db.OpenFile("./testdata/test1.dbf", false)
+
+	db.GoTo(2)
+	db.SetFieldValue(1, "Edit")
+	db.Save()
+
+	db.First()
+	db.Next()
+	require.Equal(t, "Edit", db.FieldValueAsString(1))
+	require.Equal(t, int64(3), db.RecCount())
+
+	db.CloseFile()
+	require.NoError(t, db.Error())
+}
+
+func TestOpenAddRec(t *testing.T) {
+	copyFile("./testdata/rec3.dbf", "./testdata/test2.dbf")
+
+	db := New()
+	db.OpenFile("./testdata/test2.dbf", false)
+
+	db.Add()
+	db.SetFieldValue(1, "Add")
+	db.Save()
+
+	db.First()
+	db.Last()
+	require.Equal(t, "Add", db.FieldValueAsString(1))
+	require.Equal(t, int64(4), db.RecCount())
+
+	db.CloseFile()
+	require.NoError(t, db.Error())
+}
+
+func TestCreateEditRec(t *testing.T) {
+	db := New()
+	db.AddField("NAME", "C", 3)
+	db.CreateFile("./testdata/test.dbf")
+
+	db.Add()
+	db.Save()
+
+	db.Add()
+	db.Save()
+
+	db.Add()
+	db.Save()
+
+	db.First()
+	db.Next()
+	db.SetFieldValue(1, "Abc")
+	db.Save()
+
+	db.First()
+	require.Equal(t, "", db.FieldValueAsString(1))
+
+	db.GoTo(2)
+	require.Equal(t, "Abc", db.FieldValueAsString(1))
+
+	require.Equal(t, int64(3), db.RecCount())
+
+	db.CloseFile()
+	require.NoError(t, db.Error())
+}

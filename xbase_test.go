@@ -58,6 +58,13 @@ func TestCreateEmptyFile(t *testing.T) {
 
 }
 
+func TestSetPanic(t *testing.T) {
+	db := New()
+	db.SetPanic(true)
+	require.Equal(t, true, db.IsPanic())
+	require.Panics(t, func() { db.CreateFile("./testdata/test.dbf") })
+}
+
 func TestAddEmptyRec(t *testing.T) {
 	db := New()
 	addFields(db)

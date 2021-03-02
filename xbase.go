@@ -402,7 +402,7 @@ func (db *XBase) AddField(name string, typ string, opts ...int) {
 	if db.err != nil {
 		return
 	}
-	defer db.wrapError("AddField")
+	defer db.wrapError(fmt.Sprintf("AddField: field %q", name))
 	length := 0
 	dec := 0
 	if len(opts) > 0 {

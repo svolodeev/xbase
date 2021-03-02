@@ -7,7 +7,7 @@ The XBase type is used to work with DBF files. In addition to working with exist
 The XBase object contains data for one current record. Changing field values ​​does not cause an immediate change to the file. Changes are saved when the __Save()__ method is called.
 
 ### Deleting records
-Deleting a record does not physically destroy it on disk. In record, the deletion is marked.
+Deleting a record does not physically destroy it on disk. The deletion mark is put in a special field of the record.
 
 ### Error processing
 If an error occurs when calling the method, use the __Error()__ method to get its value. By default, methods don't panic. This behavior can be changed. If you call __SetPanic(true)__, then when an error occurs, the methods will cause a panic. Use whichever is more convenient for you.

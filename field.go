@@ -165,14 +165,14 @@ func (f *field) setBuffer(recordBuf []byte, value string) {
 // Check
 
 func (f *field) checkType(t byte) {
-	if f.Type != t {
-		panic(fmt.Errorf("type mismatch"))
+	if t != f.Type {
+		panic(fmt.Errorf("type mismatch: got %q, want %q", string(t), string(f.Type)))
 	}
 }
 
 func (f *field) checkLen(value string) {
 	if len(value) > int(f.Len) {
-		panic(fmt.Errorf("field overflow"))
+		panic(fmt.Errorf("field value overflow: value len %d, field len %d", len(value), int(f.Len)))
 	}
 }
 
@@ -299,11 +299,6 @@ func (f *field) setFloatValue(recordBuf []byte, value float64) {
 }
 
 func (f *field) setValue(recordBuf []byte, value interface{}, enc *encoding.Encoder) {
-	defer func() {
-		if r := recover(); r != nil {
-			panic(fmt.Errorf("field %q: %w", f.name(), r))
-		}
-	}()
 	switch v := value.(type) {
 	case string:
 		f.setStringValue(recordBuf, v, enc)

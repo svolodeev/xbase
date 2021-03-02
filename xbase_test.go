@@ -65,6 +65,16 @@ func TestSetPanic(t *testing.T) {
 	require.Panics(t, func() { db.CreateFile("./testdata/test.dbf") })
 }
 
+func TestFieldError(t *testing.T) {
+	db := New()
+	db.OpenFile("./testdata/rec0.dbf", true)
+	db.Add()
+
+	db.SetFieldValue(0, true)
+	require.Error(t, db.Error())
+	require.Equal(t, "xbase: SetFieldValue: field 0: field number out of range", db.Error().Error())
+}
+
 func TestAddEmptyRec(t *testing.T) {
 	db := New()
 	addFields(db)

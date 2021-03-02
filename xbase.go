@@ -224,7 +224,7 @@ func (db *XBase) FieldValueAsString(fieldNo int) string {
 	if db.err != nil {
 		return ""
 	}
-	defer db.wrapError("FieldValueAsString")
+	defer db.wrapFieldError("FieldValueAsString", fieldNo)
 	return db.fieldByNo(fieldNo).stringValue(db.buf, db.decoder)
 }
 
@@ -234,7 +234,7 @@ func (db *XBase) FieldValueAsInt(fieldNo int) int64 {
 	if db.err != nil {
 		return 0
 	}
-	defer db.wrapError("FieldValueAsInt")
+	defer db.wrapFieldError("FieldValueAsInt", fieldNo)
 	return db.fieldByNo(fieldNo).intValue(db.buf)
 }
 
@@ -244,7 +244,7 @@ func (db *XBase) FieldValueAsFloat(fieldNo int) float64 {
 	if db.err != nil {
 		return 0
 	}
-	defer db.wrapError("FieldValueAsFloat")
+	defer db.wrapFieldError("FieldValueAsFloat", fieldNo)
 	return db.fieldByNo(fieldNo).floatValue(db.buf)
 }
 
@@ -254,7 +254,7 @@ func (db *XBase) FieldValueAsBool(fieldNo int) bool {
 	if db.err != nil {
 		return false
 	}
-	defer db.wrapError("FieldValueAsBool")
+	defer db.wrapFieldError("FieldValueAsBool", fieldNo)
 	return db.fieldByNo(fieldNo).boolValue(db.buf)
 }
 
@@ -265,7 +265,7 @@ func (db *XBase) FieldValueAsDate(fieldNo int) time.Time {
 	if db.err != nil {
 		return d
 	}
-	defer db.wrapError("FieldValueAsDate")
+	defer db.wrapFieldError("FieldValueAsDate", fieldNo)
 	return db.fieldByNo(fieldNo).dateValue(db.buf)
 }
 
@@ -276,7 +276,7 @@ func (db *XBase) SetFieldValue(fieldNo int, value interface{}) {
 	if db.err != nil {
 		return
 	}
-	defer db.wrapError("SetFieldValue")
+	defer db.wrapFieldError("SetFieldValue", fieldNo)
 	db.fieldByNo(fieldNo).setValue(db.buf, value, db.encoder)
 }
 
@@ -363,7 +363,7 @@ func (db *XBase) FieldInfo(fieldNo int) (name, typ string, length, dec int) {
 	if db.err != nil {
 		return
 	}
-	defer db.wrapError("FieldInfo")
+	defer db.wrapFieldError("FieldInfo", fieldNo)
 	f := db.fieldByNo(fieldNo)
 	name = f.name()
 	typ = string([]byte{f.Type})
@@ -540,7 +540,21 @@ func (db *XBase) checkRecNo() {
 
 func (db *XBase) wrapError(s string) {
 	if r := recover(); r != nil {
-		db.err = fmt.Errorf("dbf: %s: %w", s, r)
+		db.err = fmt.Errorf("xbase: %s: %w", s, r)
+		if db.isPanic {
+			panic(db.err)
+		}
+	}
+}
+
+func (db *XBase) wrapFieldError(s string, fieldNo int) {
+	if r := recover(); r != nil {
+		prefix := fmt.Sprintf("xbase: %s: field %d", s, fieldNo)
+		if fieldNo < 1 || fieldNo > len(db.fields) {
+			db.err = fmt.Errorf("%s: %w", prefix, r)
+		} else {
+			db.err = fmt.Errorf("%s %q: %w", prefix, db.fields[fieldNo-1].name(), r)
+		}
 		if db.isPanic {
 			panic(db.err)
 		}

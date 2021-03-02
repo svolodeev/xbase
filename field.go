@@ -81,7 +81,7 @@ func (f *field) setName(name string) {
 		panic(fmt.Errorf("empty field name"))
 	}
 	if len(name) > maxFieldNameLen {
-		panic(fmt.Errorf("too long field name: %q, want len(name) <= %d", name, maxFieldNameLen))
+		panic(fmt.Errorf("too long field name: %q, max len %d", name, maxFieldNameLen))
 	}
 	copy(f.Name[:], name)
 }

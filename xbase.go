@@ -465,7 +465,7 @@ func (db *XBase) SetPanic(flag bool) {
 	db.isPanic = flag
 }
 
-// IsPanic returns true if panic mode is sedb.
+// IsPanic returns true if panic mode is set.
 func (db *XBase) IsPanic() bool {
 	return db.isPanic
 }

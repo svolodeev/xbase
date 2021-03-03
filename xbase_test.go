@@ -63,6 +63,7 @@ func TestSetPanic(t *testing.T) {
 	db.SetPanic(true)
 	require.Equal(t, true, db.IsPanic())
 	require.Panics(t, func() { db.CreateFile("./testdata/test.dbf") })
+	require.Error(t, db.Error())
 }
 
 func TestSetFieldValueError(t *testing.T) {

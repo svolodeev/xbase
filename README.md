@@ -1,4 +1,7 @@
 # xbase
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/svolodeev/xbase.svg)](https://pkg.go.dev/github.com/svolodeev/xbase)
+
 A pure Go library for working with [DBF](http://en.wikipedia.org/wiki/DBase#File_formats) files. The main purpose of the library is to organize export-import of data from files in DBF format.
 
 The XBase type is used to work with DBF files. In addition to working with existing files, the XBase object allows you to create a new file of the given structure. Each XBase object can be linked with only one file.

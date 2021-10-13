@@ -309,6 +309,19 @@ func (db *XBase) Save() {
 	db.isMod = true
 }
 
+func (db *XBase) Flush() {
+	if db.err != nil {
+		return
+	}
+	defer db.wrapError("Flush")
+	if db.isMod {
+		db.header.setModDate(time.Now())
+		db.writeHeader()
+		db.writeFileEnd()
+		db.isMod = false
+	}
+}
+
 // Del marks the current record as "deleted".
 // The record is not physically deleted from the file
 // and can be subsequently restored.

@@ -292,7 +292,7 @@ func (f *field) setIntValue(recordBuf []byte, value int64) {
 }
 
 func (f *field) setFloatValue(recordBuf []byte, value float64) {
-	f.checkType('N')
+	f.checkType('F')
 	s := strconv.FormatFloat(value, 'f', int(f.Dec), 64)
 	f.checkLen(s)
 	f.setBuffer(recordBuf, padLeft(s, int(f.Len)))

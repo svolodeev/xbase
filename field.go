@@ -238,7 +238,7 @@ func (f *field) intValue(recordBuf []byte) int64 {
 }
 
 func (f *field) floatValue(recordBuf []byte) float64 {
-	f.checkType('N')
+	f.checkType('F')
 	s := string(f.buffer(recordBuf))
 	s = strings.TrimSpace(s)
 	if s == "" || s[0] == '.' {

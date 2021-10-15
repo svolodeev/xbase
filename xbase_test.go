@@ -3,6 +3,8 @@ package xbase
 import (
 	"io/ioutil"
 	"os"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -322,4 +324,57 @@ func TestCreateEditRec(t *testing.T) {
 
 	db.CloseFile()
 	require.NoError(t, db.Error())
+}
+
+func TestTryGoTo(t *testing.T) {
+	db := New()
+	db.SetPanic(true)
+	defer db.CloseFile()
+	db.AddField("NAME", "C", 30)
+	db.CreateFile("./testdata/test.dbf")
+	db.Add()
+	db.SetFieldValue(1, "Abc")
+	db.Save()
+	db.Flush()
+	//time.Sleep(time.Second)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	long := strings.Repeat("abc", 10)
+	go func() {
+		otdb := New()
+		otdb.SetPanic(true)
+		otdb.OpenFile("./testdata/test.dbf", false)
+		otdb.Add()
+		otdb.SetFieldValue(1, long)
+		otdb.Save()
+		otdb.Flush()
+		otdb.Add()
+		otdb.SetFieldValue(1, "abc")
+		otdb.Save()
+		otdb.Flush()
+		otdb.CloseFile()
+		wg.Done()
+	}()
+	wg.Wait()
+	if db.TryGoTo(2) {
+		require.Equal(t, long, db.FieldValueAsString(1))
+	} else {
+		t.Fatal()
+	}
+	db.goTo(3)
+	require.Equal(t, int64(3), db.recCount())
+	db.Add()
+	db.SetFieldValue(1, "AbcAbc")
+	db.Save()
+	db.Flush()
+	if db.TryGoTo(4) {
+		require.Equal(t, "AbcAbc", db.FieldValueAsString(1))
+	} else {
+		t.Fatal()
+	}
+	db.goTo(5)
+	if db.err == nil {
+		t.Fatal("must error")
+	}
+	require.Equal(t, int64(4), db.recCount())
 }

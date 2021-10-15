@@ -208,6 +208,37 @@ func (db *XBase) GoTo(recNo int64) {
 	db.goTo(recNo)
 }
 
+// TryGoTo allows you to go to a record by number is out range.
+// Numbering starts from 1.
+func (db *XBase) TryGoTo(recNo int64) (isSuccess bool) {
+	if db.err != nil {
+		return
+	}
+	defer db.wrapError("TryGoTo")
+	if recNo < 1 {
+		db.recNo = 0
+		return
+	}
+	if recNo <= db.recCount() {
+		db.recNo = recNo
+		db.readRec()
+		return true
+	}
+	db.recNo = recNo
+	db.seekRec()
+	db.fileRead(db.buf)
+	if db.Error() != nil {
+		//reset
+		db.recNo = int64(db.header.RecCount)
+		return false
+	}
+
+	if recNo > db.recCount() {
+		db.header.RecCount = uint32(recNo)
+	}
+	return true
+}
+
 // EOF returns true if end of file is reached or error.
 func (db *XBase) EOF() bool {
 	return db.recNo > db.recCount() || db.recCount() == 0 || db.err != nil
@@ -504,7 +535,10 @@ func (db *XBase) goTo(recNo int64) {
 		return
 	}
 	if recNo > db.recCount() {
-		db.recNo = db.recCount() + 1
+		if !db.TryGoTo(recNo) {
+			db.recNo = db.recCount() + 1
+		}
+		//db.recNo = db.recCount() + 1
 		return
 	}
 	db.recNo = recNo
@@ -686,7 +720,9 @@ func (db *XBase) fileWrite(b []byte) {
 
 func (db *XBase) fileRead(b []byte) {
 	db.checkFile()
-	if _, err := db.file.Read(b); err != nil {
+	if n, err := db.file.Read(b); err != nil {
 		panic(err)
+	} else if n == 1 && len(b) > 1 {
+		db.err = fmt.Errorf("file is EOF")
 	}
 }

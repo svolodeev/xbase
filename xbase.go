@@ -674,6 +674,15 @@ func (db *XBase) clearBuf() {
 
 // File utils
 
+// FileInfo return xbase opened file info
+func (db *XBase) FileInfo() (os.FileInfo, error) {
+	if db.file == nil {
+		return nil, fmt.Errorf("file not open")
+	}
+
+	return db.file.Stat()
+}
+
 func (db *XBase) fileCreate(name string) {
 	f, err := os.Create(name)
 	if err != nil {

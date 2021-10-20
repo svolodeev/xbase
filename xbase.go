@@ -674,13 +674,12 @@ func (db *XBase) clearBuf() {
 
 // File utils
 
-// FileInfo return xbase opened file info
-func (db *XBase) FileInfo() (os.FileInfo, error) {
+// File return xbase opened file info
+func (db *XBase) File() (*os.File, error) {
 	if db.file == nil {
 		return nil, fmt.Errorf("file not open")
 	}
-
-	return db.file.Stat()
+	return db.file, nil
 }
 
 func (db *XBase) fileCreate(name string) {

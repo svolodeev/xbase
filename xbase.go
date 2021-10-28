@@ -209,6 +209,7 @@ func (db *XBase) GoTo(recNo int64) {
 }
 
 // TryGoTo allows you to go to a record by number is out range.
+// if isSuccess is false ,rowNo will be RecCount
 // Numbering starts from 1.
 func (db *XBase) TryGoTo(recNo int64) (isSuccess bool) {
 	if db.err != nil {
@@ -229,6 +230,7 @@ func (db *XBase) TryGoTo(recNo int64) (isSuccess bool) {
 	db.fileRead(db.buf)
 	if db.Error() != nil {
 		//reset
+		db.err = nil
 		db.recNo = int64(db.header.RecCount)
 		return false
 	}
@@ -535,10 +537,10 @@ func (db *XBase) goTo(recNo int64) {
 		return
 	}
 	if recNo > db.recCount() {
-		if !db.TryGoTo(recNo) {
-			db.recNo = db.recCount() + 1
+		if db.TryGoTo(recNo) {
+			return
 		}
-		//db.recNo = db.recCount() + 1
+		db.recNo = db.recCount() + 1
 		return
 	}
 	db.recNo = recNo

@@ -3,6 +3,7 @@ package xbase
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -227,7 +228,17 @@ func (db *XBase) TryGoTo(recNo int64) (isSuccess bool) {
 	}
 	db.recNo = recNo
 	db.seekRec()
-	db.fileRead(db.buf)
+	//db.fileRead(db.buf)
+	if n, err := db.file.Read(db.buf); err != nil {
+		if err == io.EOF {
+			db.err = io.EOF
+		} else {
+			panic(err)
+		}
+	} else if n == 1 && len(db.buf) > 1 {
+		db.err = io.EOF
+	}
+
 	if db.Error() != nil {
 		//reset
 		db.err = nil
